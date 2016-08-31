@@ -35,9 +35,10 @@ class LDA_topic_model(BaseEstimator):
         else:
             self.vectorizer = CountVectorizer()
 
-        # Make sure nltk has required datasets
+        # Make sure nltk has required data sets
         nltk.download('punkt')
         nltk.download('stopwords')
+        nltk.download('wordnet')
 
     def fit(self, X):
         """

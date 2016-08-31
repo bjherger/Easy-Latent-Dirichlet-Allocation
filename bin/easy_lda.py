@@ -22,7 +22,7 @@ from sklearn.base import BaseEstimator
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-class TopicModeller(BaseEstimator):
+class TopicModeler(BaseEstimator):
     """
     An estimator to make topic modeling easier.
 
@@ -70,7 +70,7 @@ class TopicModeller(BaseEstimator):
         :param X: List of documents, where each document is one string
         :type X: [str]
         :return: self
-        :rtype: TopicModeller
+        :rtype: TopicModeler
         """
         logging.info('Fitting LDA Model')
         logging.debug('Input X: %s' % X)

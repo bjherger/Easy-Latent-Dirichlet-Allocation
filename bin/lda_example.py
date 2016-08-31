@@ -26,7 +26,7 @@ def main():
 
     X = review_df['review_text'].as_matrix()
 
-    topic_modeller = easy_lda.TopicModeller(num_topics=5, num_iterations=500, clean_text=True, random_state=0)
+    topic_modeller = easy_lda.TopicModeler(num_topics=5, num_iterations=500, clean_text=True, random_state=0)
 
     # Fit model
     topic_modeller.fit(X)

@@ -1,6 +1,7 @@
 name: lda_environment
 dependencies:
 - mkl=11.3.3=0
+- nltk=3.2.1=py27_0
 - numpy=1.11.1=py27_0
 - openssl=1.0.2h=2
 - pandas=0.18.1=np111py27_0
@@ -20,3 +21,4 @@ dependencies:
 - pip:
   - lda==1.0.4
   - pbr==1.10.0
+prefix: /Users/bjherger/anaconda2/envs/lda_environment

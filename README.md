@@ -1,7 +1,11 @@
 # Easy Latent Dirichlet Allocation
 
-Frustrated by the complexity and time sink of using common Python tools to perform topic modeling, and assign topics 
-to text, I've iterated on this code over the last few years as a tool to quickly:
+The ultimate goal of this project is to take something like a bunch of poorly formatted, grammatically challenged 
+internet movie reviews, and output a list of usable topics, like `[u'film movie wa action alien star first effect 
+war', u'american life war men power black political art state', u'comedy funny john high big little laugh fun star', u'life story first family little world character ha one', u'film one movie ha wa like character time scene']`
+
+Frustrated by the complexity and time sink of using common Python tools to perform topic modeling, I've iterated on 
+this code over the last few years as a tool to quickly:
 
  - clean text (if necessary)
  - train an LDA model

@@ -1,11 +1,22 @@
-name: python_environment
+name: lda_environment
 dependencies:
+- mkl=11.3.3=0
+- numpy=1.11.1=py27_0
 - openssl=1.0.2h=2
+- pandas=0.18.1=np111py27_0
 - pip=8.1.2=py27_0
 - python=2.7.12=1
+- python-dateutil=2.5.3=py27_0
+- pytz=2016.6.1=py27_0
 - readline=6.2=2
+- scikit-learn=0.17.1=np111py27_2
+- scipy=0.18.0=np111py27_0
 - setuptools=26.1.1=py27_0
+- six=1.10.0=py27_0
 - sqlite=3.13.0=0
 - tk=8.5.18=0
 - wheel=0.29.0=py27_0
 - zlib=1.2.8=3
+- pip:
+  - lda==1.0.4
+  - pbr==1.10.0

@@ -2,6 +2,9 @@
   <dictionary name="bjherger">
     <words>
       <w>preprocess</w>
+      <w>preprocessing</w>
+      <w>proba</w>
+      <w>vectorizing</w>
     </words>
   </dictionary>
 </component>

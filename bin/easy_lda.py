@@ -22,7 +22,7 @@ from sklearn.base import BaseEstimator
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-class LDA_topic_model(BaseEstimator):
+class TopicModeller(BaseEstimator):
     """
     An estimator to make topic modeling easier.
 
@@ -70,7 +70,7 @@ class LDA_topic_model(BaseEstimator):
         :param X: List of documents, where each document is one string
         :type X: [str]
         :return: self
-        :rtype: LDA_topic_model
+        :rtype: TopicModeller
         """
         logging.info('Fitting LDA Model')
         logging.debug('Input X: %s' % X)
@@ -105,6 +105,7 @@ class LDA_topic_model(BaseEstimator):
         :type X: [str]
         :param max_iter: The maximum number of iterations to allow for transformation. This should be monitored to check
         if log likelihood is decreasing.
+        :type max_iter: int
         :param tol:  Tolerance value used in stopping condition.
         :type tol: float
         :return: List of assigned topic numbers, numbered beginning at index 0
@@ -130,15 +131,21 @@ class LDA_topic_model(BaseEstimator):
     def predict_proba(self, X, max_iter=20, tol=1e-16):
         """
         Predict the probability of the document being in each topic. Each row is one document, each observation is the
-        probility of the document mapping the to the topic at the index. For exampe:
+        probability of the document mapping the to the topic at the index. For example:
         [[.5, .2, .3],
          [.1, .7, .2]]
 
         This would suggest that the 0th document has a .5 probability of belonging to topic 0, .2 probability of
         belonging to topic 1, and .3 probability of belonging to topic 2. [.1, .7, .2] represents the probabilities for
          document 1.
+
         :param X: List of documents, where each document is one string
         :type X: [str]
+        :param max_iter: The maximum number of iterations to allow for transformation. This should be monitored to check
+        if log likelihood is decreasing.
+        :type max_iter: int
+        :param tol:  Tolerance value used in stopping condition.
+        :type tol: float
         :return: Matrix containing probability for each document, for each topic
         """
         if self.clean_text:

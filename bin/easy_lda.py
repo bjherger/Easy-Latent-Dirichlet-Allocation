@@ -15,15 +15,39 @@ import nltk
 import numpy as np
 import pandas as pd
 
-from sklearn.base import BaseEstimator
-from sklearn.feature_extraction.text import CountVectorizer
-
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 
+from sklearn.base import BaseEstimator
+from sklearn.feature_extraction.text import CountVectorizer
+
 
 class LDA_topic_model(BaseEstimator):
+    """
+    An estimator to make topic modeling easier.
+
+    Building on lda (http://pythonhosted.org/lda/), this estimator is designed to make it easier to:
+     - clean text (if necessary)
+     - train an LDA model
+     - predict a topic for text
+
+    """
+
     def __init__(self, num_topics=6, num_iterations=500, random_state=None, clean_text=True, vectorizer=None):
+        """
+        Init for LDA estimator
+        :param num_topics: Number of topics to model (generally 3-10)
+        :type num_topics: int
+        :param num_iterations: Number of iterations to allow before locking in topics
+        :type num_iterations: int
+        :param random_state: Random seed, for consistent topics
+        :type random_state: int
+        :param clean_text: Whether to clean text using self.preprocess(). Recommended if you have not preprocessed
+        the text already
+        :type clean_text: bool
+        :param vectorizer: Word vectorizer to use. The word vectorizer should convert a collection of text documents
+        to a matrix of token counts
+        """
         self.num_topics = num_topics
         self.num_iterations = num_iterations
         self.random_state = random_state
@@ -51,18 +75,26 @@ class LDA_topic_model(BaseEstimator):
         logging.info('Fitting LDA Model')
         logging.debug('Input X: %s' % X)
 
+        # Check if we should clean text
         if self.clean_text:
+            logging.info('Cleaning text')
             X = map(self.preprocess, X)
+            logging.debug('Cleaned text: %s' % X)
 
         # Vectorize data
+        logging.info('Vectorizing data')
         vectorizer = self.vectorizer
         doc_matrix = vectorizer.fit_transform(X)
+        logging.debug('Vectorized data: %s' % doc_matrix)
 
         # Create LDA model
+        logging.info('Fitting LDA model')
         model = self.lda_model
         model.fit(doc_matrix)
 
+        logging.info('Creating topic descriptions')
         self.set_topic_descriptions()
+        logging.info('Topic descriptions: %s ' % self.get_topic_description_df)
 
         return self
 
@@ -74,17 +106,22 @@ class LDA_topic_model(BaseEstimator):
         :param max_iter: The maximum number of iterations to allow for transformation. This should be monitored to check
         if log likelihood is decreasing.
         :param tol:  Tolerance value used in stopping condition.
+        :type tol: float
         :return: List of assigned topic numbers, numbered beginning at index 0
         :rtype: [int]
         """
 
         if self.clean_text:
+            logging.info('Cleaning text')
             X = map(self.preprocess, X)
+            logging.debug('Cleaned text: %s' % X)
 
         # Get raw probabilities for each topic
+        logging.info('Getting raw probabilities for each topic')
         topic_probabilities = self.predict_proba(X, max_iter, tol)
 
         # Find index of most likely topic
+        logging.info('Finding index of most likely topic')
         topic_numbers = map(lambda x: x.argmax(), topic_probabilities)
 
         # Return results
@@ -126,6 +163,7 @@ class LDA_topic_model(BaseEstimator):
          ['farming', 'breeding', 'livestock'] refers to the first topic.
 
         :param n_top_words: Number of canonical words to return for each topic
+        :type n_top_words: int
         :return: list of lists, containing canonical words
         :rtype: [[str]]
         """
@@ -142,23 +180,30 @@ class LDA_topic_model(BaseEstimator):
         return return_matrix
 
     def set_topic_descriptions(self, n_top_words=10):
-        # Convert vocabulary from {'word': index} to array with every word in its index
+        """
+        Set the topic description. The topic description is set during fit(), to avoid issues with changing
+        vocabulary / vectorizer issues.
+        :param n_top_words: Number of top words to include
+        :return: None
+        :rtype: None
+        """
+        # Convert vocabulary from {'word': index} to array with every word in its index (e.g. ['the', 'fat', 'man'])
         vocab_dict = self.vectorizer.vocabulary_
         vocab = [None] * (max(vocab_dict.values()) + 1)
 
         for key, value in vocab_dict.iteritems():
             vocab[value] = key
 
+        # Pull topic_word object from lda model
         topic_word = self.lda_model.topic_word_
 
         # Create DataFrame containing top words for every topic
         topic_words_list = list()
-        for i, topic_dist in enumerate(topic_word):
-
-            ordered_vocab = np.array(vocab)[np.argsort(topic_dist)]
+        for topic_index, topic_word_values in enumerate(topic_word):
+            ordered_vocab = np.array(vocab)[np.argsort(topic_word_values)]
             topic_words = ordered_vocab[:-n_top_words:-1]
             local_dict = dict()
-            local_dict['topic_number'] = i
+            local_dict['topic_number'] = topic_index
             local_dict['top_words_list'] = topic_words
 
             topic_words_list.append(local_dict)
@@ -168,15 +213,15 @@ class LDA_topic_model(BaseEstimator):
 
         self.get_topic_description_df = topic_words_df
 
-
-    def preprocess(self, input_str):
+    @staticmethod
+    def preprocess(input_str):
         """
         Preprocess individual strings, including:
-         > Normalize text (Lowercase, remove characters that are not letter or whitespace)
-         > Tokenize (Break long string into individual document_words)
-         > Lemmatize (Normalize similar document_words)
-         > Remove custom stopwords (Remove document_words that have little value in this context)
-         > Rejoin (Make everything back into one long string)
+         - Normalize text (Lowercase, remove characters that are not letter or whitespace)
+         - Tokenize (Break long string into individual document_words)
+         - Lemmatize (Normalize similar document_words)
+         - Remove custom stopwords (Remove document_words that have little value in this context)
+         - Rejoin (Make everything back into one long string)
         :param input_str: raw string
         :type input_str: unicode
         :return: String, containing normalized text
@@ -219,11 +264,29 @@ class LDA_topic_model(BaseEstimator):
         return output
 
     def transform_with_all_data_df(self, X, max_iter=20, tol=1e-16, n_top_words=10):
+        """
+        Create a Pandas DataFrame containing the following:
+         - input_text: Text, as it was when it was input
+         - normalized_text: Text that was used for modeling. This may be the same as input_text, if clean_text = False
+         - topic_number: The topic most associated with this document
+         - topic_description: The words most associated with the topic associated with this document
+         - topic_i: (for integer values of i) The probability that this document belongs to topic i
+        :param X: List of documents, where each document is one string
+        :type X: [str]
+        :param max_iter: The maximum number of iterations to allow for transformation. This should be monitored to check
+        if log likelihood is decreasing.
+        :param tol:  Tolerance value used in stopping condition.
+        :type tol: float
+        :param n_top_words: Number of canonical words to return for each topic
+        :type n_top_words: int
+        :return: DataFrame containing fields described in docstring
+        :rtype: pd.DataFrame
+        """
         return_df = pd.DataFrame(X, columns=['input_text'])
         if self.clean_text:
             X = map(self.preprocess, X)
         return_df['normalized_text'] = X
-        probability_col_names = map(lambda x: 'topic_' + str(x), range(0,self.num_topics, 1))
+        probability_col_names = map(lambda x: 'topic_' + str(x), range(0, self.num_topics, 1))
         topic_probabilities_df = pd.DataFrame(self.predict_proba(X, max_iter, tol), columns=probability_col_names)
         topic_number_df = pd.DataFrame(self.transform(X, max_iter, tol), columns=['topic_number'])
 

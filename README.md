@@ -62,4 +62,4 @@ Not happy with the default settings? Here are a few areas to tweak to get more m
  used in `bin/lda_example.py`). Try implementing your own variaiton of `preprocess`, with more or less stop words. 
 
 ## Contact
-Feel free to contact me at 13herger <at> gmail <dot> com
+Feel free to contact me at 13herger _at_ gmail _dot_ com
